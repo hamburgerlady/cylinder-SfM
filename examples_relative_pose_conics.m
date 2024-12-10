@@ -21,7 +21,7 @@ if nargin < 3, e3q3  = 0; end
 if nargin < 2, noise = 0; end
 if nargin < 1, type  = 1; end
 
-addpath(genpath('../matlab'))
+addpath(genpath('../cylinder-SfM'))
 
 %% Setup and pre-calculations
 
