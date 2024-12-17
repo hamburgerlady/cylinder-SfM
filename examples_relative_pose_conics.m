@@ -1,4 +1,4 @@
-function [min_errs opt] = examples_relative_pose_conics(type, noise, e3q3, plots, seed)
+function [min_errs] = examples_relative_pose_conics(type, noise, e3q3, plots, seed)
 % EXAMPLES RELATIVE POSE CONICS
 % min_errs = examples_relative_pose_conics(type, noise, e3q3, seed, dbug, plots)
 %
@@ -65,10 +65,8 @@ if type == 1
         if pick == 2
             min_errs = min_errs2;
             disp('second option')
-            opt = 2;
         else
             disp('first option')
-            opt = 1;
         end
     end
     
@@ -263,12 +261,12 @@ cylinder2 = load_cylinder(plots, 2); % rotation in xz-plane, free translation
 
 % Camera 1
 R1 = moderatelyRandomRotationMatrix();
-t1 = 5*randn(3,1);
+t1 = 3*randn(3,1);
 cameras{1} = [R1 (-R1*t1)];
 
 % Camera 2
 R2 = moderatelyRandomRotationMatrix();
-t2 = 5*randn(3,1);
+t2 = 3*randn(3,1);
 cameras{2} = [R2 (-R2*t2)];
 
 % Calculate lines
@@ -433,7 +431,7 @@ end
 function cylinders = load_cylinder(plots, cyl_nr)
 
 % Simulate 3D cylinders
-r = 0.1*rand+0.5; % radius
+r = 0.3*rand+0.5; % radius
 dist = 10+rand*2; % distance to origo
 
 c1 = (rand-1)*5; % x coordinate

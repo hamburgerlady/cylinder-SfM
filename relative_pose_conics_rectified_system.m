@@ -27,16 +27,34 @@ data0(1:4) = rot2quat(P2_R);
 
 % Lines cylinder1 (idx: camera, cylinder, line)
 data0(5) = lines.l_111(1);
-data0(6) = lines.l_211(1); 
-data0(7) = lines.l_212(1); 
+data0(6) = lines.l_211(1);
+data0(7) = lines.l_212(1);
 
 sols_P2_xz = solver_initialization_camera_translation(data0);
 
-%% Solver 2
-sols = [];
+% Pick correct solution
+P2_R_red = P2_R([1 3],[1 3]);
 
-% Runs solver 2 for each solution of solver 1.
-for i = 1:size(sols_P2_xz,2)
+true_sol_xz = [];
+
+for i = 1:4
+    p = sols_P2_xz(:,i);
+    % P = [R -R*t1];
+    %proj_c = [P2_R_red p]*[0 1 1]'
+    % proj_c = [P2_R_red -P2_R_red'*p]*[-P2_R_red'*sols_P2_xz; ones(1,4)];
+    proj_c = [P2_R_red -P2_R_red*p]*[sols_P2_xz; ones(1,4)];
+    %proj_c = [-P2_R_red' p]*[P2_R_red*sols_P2_xz; ones(1,4)];
+    %proj_c = [-P2_R_red' p]*[P2_R_red*sols_P2_xz; ones(1,4)];
+    proj_c(:,i) = [];
+    if ~sum(proj_c(2,:) < 0)
+        true_sol_xz = p;
+    end
+end
+
+%true_sol_xz
+
+sols_P2_xz = true_sol_xz;
+%% Solver 2
     
     data1(1:4) = rot2quat(C2_R);
     data1(5:8) = rot2quat(P2_R); 
@@ -47,7 +65,7 @@ for i = 1:size(sols_P2_xz,2)
     data1(13:14) = lines.l_221(1:2);
     data1(15:16) = lines.l_222(1:2);
     
-    data1(17:18) = [sols_P2_xz(1,i) sols_P2_xz(2,i)];
+    data1(17:18) = [sols_P2_xz(1) sols_P2_xz(2)];
     
     if size(data1,1) == 1
         data1 = data1';
@@ -91,10 +109,7 @@ for i = 1:size(sols_P2_xz,2)
     
     n_sols = size(sols2,2);
     
-    sols = [sols [repmat(sols_P2_xz(1,i),1,n_sols); sols2(1,:); repmat(sols_P2_xz(2,i),1,n_sols); ...
-        sols2(2:end,:); r]];
-end
-
+    sols = [repmat(sols_P2_xz(1),1,n_sols); sols2(1,:); repmat(sols_P2_xz(2),1,n_sols); sols2(2:end,:); r];
 end
 
 function [P2_R] = calculateP2_R(lines)
@@ -216,10 +231,10 @@ n = 9;
 l_121 = [data0(n:n+1); 1]; n = n+2;
 l_122 = [data0(n:n+1); 1]; n = n+2;
 l_221 = [data0(n:n+1); 1]; n = n+2;
-l_222 = [data0(n:n+1); 1]; 
+l_222 = [data0(n:n+1); 1];
 
 
-xx = create_vars(nbr_unknowns+1); 
+xx = create_vars(nbr_unknowns+1);
 P2_t = [data0(17) xx(1) data0(18)]';
 % r1pow2 = l111(1)^2/(1+l111(1)^2)*p_z^2; % Likformighet, men får inte
 % använda kvoter
@@ -227,17 +242,17 @@ T2_t = xx(2:3);
 r2pow2 = xx(4);
 
 % Cameras
-P1 = [eye(3) zeros(3,1)]; 
+P1 = [eye(3) zeros(3,1)];
 R2 = quat2rot(P2_R_quat);
 P2 = [R2 (-R2*P2_t)];
 
 C2_R = quat2rot(C2_R_quat);
 A = [C2_R' [T2_t(1); 0; T2_t(2)]; 0 0 0 1];
 C_0inv = [-r2pow2  0  0       0; ...
-           0       0  0       0; ...
-           0       0 -r2pow2  0; ...
-           0       0  0       1];
-    
+    0       0  0       0; ...
+    0       0 -r2pow2  0; ...
+    0       0  0       1];
+
 D2 = A*C_0inv*A';
 % D2 = zp_reduce(D2, p);
 
