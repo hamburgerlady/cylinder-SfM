@@ -40,11 +40,7 @@ true_sol_xz = [];
 for i = 1:4
     p = sols_P2_xz(:,i);
     % P = [R -R*t1];
-    %proj_c = [P2_R_red p]*[0 1 1]'
-    % proj_c = [P2_R_red -P2_R_red'*p]*[-P2_R_red'*sols_P2_xz; ones(1,4)];
     proj_c = [P2_R_red -P2_R_red*p]*[sols_P2_xz; ones(1,4)];
-    %proj_c = [-P2_R_red' p]*[P2_R_red*sols_P2_xz; ones(1,4)];
-    %proj_c = [-P2_R_red' p]*[P2_R_red*sols_P2_xz; ones(1,4)];
     proj_c(:,i) = [];
     if ~sum(proj_c(2,:) < 0)
         true_sol_xz = p;
